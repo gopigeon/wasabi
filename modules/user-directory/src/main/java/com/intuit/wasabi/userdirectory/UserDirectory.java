@@ -22,4 +22,8 @@ public interface UserDirectory {
     UserInfo lookupUserByEmail(String userEmail);
 
     UserInfo lookupUser(UserInfo.Username username);
+
+    UserInfo getUserByEmail(String userEmail);
+
+    UserInfo addUser(String username, String password, String firstName, String lastName);
 }

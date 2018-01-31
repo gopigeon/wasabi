@@ -10,6 +10,9 @@
             <small class="text-danger" ng-if="loginFailed">
                 Invalid username and/or password.
             </small>
+            <small class="text-danger" ng-if="domainFailed">
+                Only Narvar id allowed.
+            </small>
             <small class="text-danger" ng-if="serverDown">
                 The Wasabi A/B Testing Server is down, please try again later.
             </small>
@@ -18,6 +21,10 @@
                 <input remember-me type="checkbox" id="chkRememberMe" ng-model="credentials.rememberMe"><label for="chkRememberMe" class="checkboxLabel">Remember me</label>
             </div>
             <button id="btnSignin" class="blue">Sign In</button>
+            <div style="margin-top: 15px">
+                <script src="https://apis.google.com/js/platform.js"></script>
+                <div class="g-signin2" data-onsuccess="onSignIn"></div>
+            </div>
         </div>
     </form>
     <div ng-if="dontShowForm">

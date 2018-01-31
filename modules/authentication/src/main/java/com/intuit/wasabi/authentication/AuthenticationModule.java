@@ -53,6 +53,10 @@ public class AuthenticationModule extends AbstractModule {
                 .toInstance(getProperty("authentication.token.version", properties));
         bind(String.class).annotatedWith(named("authentication.http.proxy.host"))
                 .toInstance(getProperty("http.proxy.host", properties));
+        bind(String.class).annotatedWith(named("google.client.id"))
+                .toInstance(getProperty("google.client.id", properties));
+        bind(String.class).annotatedWith(named("domain"))
+                .toInstance(getProperty("domain", properties));
         bind(Integer.class).annotatedWith(named("authentication.http.proxy.port"))
                 .toInstance(Integer.parseInt(getProperty("http.proxy.port", properties, "80")));
 
@@ -66,7 +70,6 @@ public class AuthenticationModule extends AbstractModule {
             bind(AuthenticateByHttpRequest.class).to(NoOpAuthenticateByHttpRequestImpl.class).asEagerSingleton();
         } catch (ClassNotFoundException e) {
             LOGGER.error("unable to find class: {}", authenticationClassName, e);
-
             throw new AuthenticationException("unable to find class: " + authenticationClassName, e);
         }
 

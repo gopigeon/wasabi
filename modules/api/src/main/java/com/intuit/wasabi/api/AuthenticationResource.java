@@ -104,6 +104,32 @@ public class AuthenticationResource {
     }
 
     /**
+     * Google Log in user
+     *
+     * @param accessToken
+     * @return Response object
+     */
+
+    @POST
+    @Path("/googlelogin")
+    @Consumes(APPLICATION_FORM_URLENCODED)
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Log a Narvaruser in")
+    @Timed
+    public Response logGoogleUserIn(
+            @FormParam("access_token")
+            @ApiParam(value = "please enter google access token here")
+            final String accessToken) {
+        try {
+            //pass the headers along to try and log the user in
+            return httpHeader.headers().entity(authentication.googleLogIn(accessToken)).build();
+        } catch (Exception exception) {
+            LOGGER.error("logUserIn failed for grantType={} with error:", accessToken, exception);
+            throw exception;
+        }
+    }
+
+    /**
      * Verify token
      *
      * @param tokenHeader

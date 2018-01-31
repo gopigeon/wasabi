@@ -21,6 +21,25 @@ angular.module('wasabi.services').factory('AuthFactory', ['$resource', 'Session'
                     return $.parseJSON(data);
                 }
             },
+            gSignIn: { method: 'POST',
+                url: ConfigFactory.baseUrl() + '/authentication/googlelogin',
+                headers : {'Content-Type': 'application/x-www-form-urlencoded'},
+                timeout: 30000,
+                transformRequest: function (data) {
+                    console.log(data);
+                    // data = {
+                    //     'grant_type': 'client_credentials'
+                    // };
+                    return $.param(data);
+                },
+                transformResponse: function (data) {
+                    if (!data || data.length <= 0) {
+                        data = '{"error": true}';
+                    }
+                    sessionStorage.removeItem('wasabiSession');
+                    return $.parseJSON(data);
+                }
+            },
             verifyToken: { method: 'GET',
                 url: ConfigFactory.baseUrl() + '/authentication/verifyToken',
                 transformResponse: function (data) {

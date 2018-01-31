@@ -115,6 +115,92 @@ angular.module('wasabi.controllers')
                     });
                 };
 
+                $scope.googleSignIn = function (credentials) {
+                    $scope.loginFailed = false;
+                    $scope.domainFailed = false;
+                    $scope.serverDown = false;
+
+                    var creds = JSON.stringify({
+                            username: '',
+                            password: ''
+                        });
+                    if (ConfigFactory.authnType() !== 'sso') {
+                        $cookies.wasabiRememberMe = (credentials.rememberMe ? credentials.username : '');
+
+                        creds = JSON.stringify({
+                                username: credentials.username,
+                                password: credentials.password
+                            });
+                    }
+                    // Directly save the credentials for use in the HttpInterceptor (workaround for passing username/password)
+                    
+                    sessionStorage.setItem('wasabiSession', creds);
+                    var data = {};
+                    data.access_token = credentials.access_token;
+                    console.log(data);
+                    AuthFactory.gSignIn(data).$promise.then(function(result) {
+                        localStorage.removeItem('wasabiLastSearch');
+
+                        // In the case where we are doing an SSO login, we expect the backend to have extracted
+                        // the user's credentials and to return their username to us, since we need that for
+                        // authorization.
+                        var username = (ConfigFactory.authnType() === 'sso' ? result.access_token : credentials.username);
+                        var sessionInfo = {userID: username, accessToken: result.access_token, tokenType: result.token_type};
+                        Session.create(sessionInfo);
+
+                        result.username = username;
+                        UtilitiesFactory.getPermissions(result, $scope.transitionToFirstPage);
+                    }, function(reason) {
+                        if (reason.data.error && reason.data.error.code !== 401) {
+                            $scope.serverDown = true;
+                            if (ConfigFactory.authnType() === 'sso') {
+                                // Something else is wrong besides the user not having their SSO creds.  We don't
+                                // want to show them the login form, so we will just show a message that the system
+                                // is down and they should try again.  This prevents a loop where the user *has*
+                                // authenticated to SSO, but for some reason the backend isn't able to detect it.
+                                // We don't want the user to keep going back to the SSO site, then back here, then
+                                // back to the SSO site, etc.
+                                $scope.redirectUrl = ConfigFactory.noAuthRedirect();
+                            }
+                        }
+                        else {
+                            if (ConfigFactory.authnType() === 'sso') {
+                                window.location.href = ConfigFactory.noAuthRedirect();
+                            }
+                            else {
+                                $scope.domainFailed = true;
+                            }
+                        }
+                        $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+                    });
+                };
+
+
+                function onSignIn(googleUser) {
+                    var profile = googleUser.getBasicProfile();
+                    console.log('ID: ' + profile.getId());
+                    console.log('Name: ' + profile.getName());
+                    console.log('Image URL: ' + profile.getImageUrl());
+                    console.log('Email: ' + profile.getEmail());
+                    var email = profile.getEmail();
+                    var credentials = {}
+                    credentials.username = email;
+                    credentials.access_token = googleUser.getAuthResponse().id_token;
+                    $scope.googleSignIn(credentials);
+                    signOut();
+                   }
+
+                function signOut() {
+                    console.log("signOut called")
+                    var auth2 = gapi.auth2.getAuthInstance();
+                    auth2.signOut().then(function () {
+                      console.log('User signed out.');
+                    });
+                }
+
+
+                window.onSignIn = onSignIn;
+
                 if (ConfigFactory.authnType() === 'sso') {
                     // We are performing an alternate form of authentication that assumes the user has authenticated
                     // to a Single Sign On service and the results have been passed in secure cookies.  We are expecting

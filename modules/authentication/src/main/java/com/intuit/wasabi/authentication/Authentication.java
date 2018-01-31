@@ -62,4 +62,13 @@ public interface Authentication {
      */
     UserInfo getUserExists(String userEmail);
 
+    /**
+     * Attempts to verify the user token retrieved via the request.
+     *
+     * @param googleToken
+     * @return a login token for this user on success
+     * @throws AuthenticationException if not successful
+     */
+    LoginToken googleLogIn(String googleToken);
+
 }

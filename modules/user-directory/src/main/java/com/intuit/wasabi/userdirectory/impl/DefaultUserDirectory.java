@@ -25,6 +25,10 @@ import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.userdirectory.UserDirectory;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.LineNumberReader;
 import java.util.List;
 
 import static java.text.MessageFormat.format;
@@ -73,5 +77,59 @@ public class DefaultUserDirectory implements UserDirectory {
         }
 
         throw new AuthenticationException(format("Username does not exist: {0}", usernameString));
+    }
+
+    @Override
+    public UserInfo addUser(String username, String password, String firstName, String lastName){
+        UserInfo userInfo = new UserInfo.Builder(UserInfo.Username.valueOf(username))
+                .withUserId(username)
+                .withPassword(password)
+                .withEmail(username)
+                .withFirstName(firstName)
+                .withLastName(lastName)
+                .build();
+        users.add(userInfo);
+        writeToFile(username, firstName, lastName);
+        return userInfo;
+    }
+
+    @Override
+    public UserInfo getUserByEmail(final String userEmail) {
+
+        for (UserInfo user : users) {
+            if (user.getEmail().equals(userEmail)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    private void writeToFile(String username, String firstName, String lastName) {
+        File file = null;
+        FileReader fr = null;
+        LineNumberReader lnr = null;
+        String line = "";
+        String newLine = "";
+        FileWriter writer;
+        try {
+            file = new File("modules/user-directory/src/main/resources/userDirectory.properties");
+            fr = new FileReader(file);
+            lnr = new LineNumberReader(fr);
+
+            while ((line = lnr.readLine()) != null) {
+                if(line.startsWith("user.ids")){
+                    line = line+":"+username;
+                    newLine = newLine +line+ "\r\n";
+                } else {
+                    newLine = newLine +line+ "\r\n";
+                }
+            }
+            newLine = newLine+"user."+username+":"+username+"::"+username+":"+firstName+":"+lastName + "\r\n";
+            writer = new FileWriter("modules/user-directory/src/main/resources/userDirectory.properties");
+            writer.write(newLine);
+            writer.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
