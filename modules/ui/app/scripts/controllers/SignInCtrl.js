@@ -3,13 +3,15 @@
 /*jshint -W106*/ // disable jshint warning about camel case
 
 angular.module('wasabi.controllers')
-    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory', 'StateFactory', 'ConfigFactory',
-            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory, StateFactory, ConfigFactory) {
+    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory', 'StateFactory', 'ConfigFactory', 'GOOGLE_LOGIN',
+            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory, StateFactory, ConfigFactory, GOOGLE_LOGIN) {
+                $scope.domain = GOOGLE_LOGIN.domain ;
 
                 $scope.credentials = {
                     username: '',
                     password: ''
                 };
+
 
                 $scope.dontShowForm = true;
 
@@ -186,7 +188,11 @@ angular.module('wasabi.controllers')
                     var credentials = {}
                     credentials.username = email;
                     credentials.access_token = googleUser.getAuthResponse().id_token;
-                    $scope.googleSignIn(credentials);
+                    try{
+                        $scope.googleSignIn(credentials);
+                    } catch (err){
+                        console.log(err.toString());
+                    }
                     signOut();
                    }
 

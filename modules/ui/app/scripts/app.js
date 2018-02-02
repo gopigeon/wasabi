@@ -176,6 +176,10 @@ angular.module('wasabi', [
         superAdminPerm: 'SUPERADMIN'
     })
 
+    .constant('GOOGLE_LOGIN', {
+        domain : "narvar.com"
+    })
+
     /*
      * watch transitions/routes to the next page/URL and prevents if user is not authorized or signed in
      */

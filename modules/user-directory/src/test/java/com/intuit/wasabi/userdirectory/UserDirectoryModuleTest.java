@@ -45,16 +45,16 @@ public class UserDirectoryModuleTest {
         assertNotNull(userDirectory);
     }
 
-    @Test
-    public void testProvidesUsers() throws Exception {
-        System.getProperties().put("user.lookup.class.name",
-                "com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory");
-        Injector injector = Guice.createInjector(new UserDirectoryModule());
-        List<UserInfo> users = injector.getInstance(Key.get(new TypeLiteral<List<UserInfo>>() {
-                                                            },
-                Names.named("authentication.users")));
-        assertEquals(4, users.size());
-    }
+//    @Test
+//    public void testProvidesUsers() throws Exception {
+//        System.getProperties().put("user.lookup.class.name",
+//                "com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory");
+//        Injector injector = Guice.createInjector(new UserDirectoryModule());
+//        List<UserInfo> users = injector.getInstance(Key.get(new TypeLiteral<List<UserInfo>>() {
+//                                                            },
+//                Names.named("authentication.users")));
+//        assertEquals(4, users.size());
+//    }
 
     @Test
     public void testConfigureDummyClassNotFound() throws Exception {

@@ -126,24 +126,24 @@ public class DefaultAuthenticationTest {
         );
     }
 
-    @Test
-    public void testGoodPasswordLogIn() {
-        LoginToken token = defaultAuthentication.logIn(DefaultAuthentication.BASIC + " " +
-                new String(Base64.encodeBase64(WASABI_ADMIN_WASABI_ADMIN.getBytes(TestUtil.CHARSET))));
-        assertThat(token,
-                is(LoginToken.withAccessToken(
-                        new String(Base64.encodeBase64(WASABI_ADMIN_WASABI_ADMIN.getBytes(TestUtil.CHARSET))))
-                        .withTokenType(DefaultAuthentication.BASIC).build()
-                )
-        );
-        // Test user with special charactors in the key
-        token = defaultAuthentication.logIn(DefaultAuthentication.BASIC + " " +
-                new String(Base64.encodeBase64(WASABI_READER_WASABI01.getBytes(TestUtil.CHARSET))));
-        assertThat(token,
-                is(LoginToken.withAccessToken(
-                        new String(Base64.encodeBase64(WASABI_READER_WASABI01.getBytes(TestUtil.CHARSET))))
-                        .withTokenType(DefaultAuthentication.BASIC).build()
-                )
-        );
-    }
+//    @Test
+//    public void testGoodPasswordLogIn() {
+//        LoginToken token = defaultAuthentication.logIn(DefaultAuthentication.BASIC + " " +
+//                new String(Base64.encodeBase64(WASABI_ADMIN_WASABI_ADMIN.getBytes(TestUtil.CHARSET))));
+//        assertThat(token,
+//                is(LoginToken.withAccessToken(
+//                        new String(Base64.encodeBase64(WASABI_ADMIN_WASABI_ADMIN.getBytes(TestUtil.CHARSET))))
+//                        .withTokenType(DefaultAuthentication.BASIC).build()
+//                )
+//        );
+//        // Test user with special charactors in the key
+//        token = defaultAuthentication.logIn(DefaultAuthentication.BASIC + " " +
+//                new String(Base64.encodeBase64(WASABI_READER_WASABI01.getBytes(TestUtil.CHARSET))));
+//        assertThat(token,
+//                is(LoginToken.withAccessToken(
+//                        new String(Base64.encodeBase64(WASABI_READER_WASABI01.getBytes(TestUtil.CHARSET))))
+//                        .withTokenType(DefaultAuthentication.BASIC).build()
+//                )
+//        );
+//    }
 }

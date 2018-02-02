@@ -54,67 +54,67 @@ public class DefaultUserDirectoryTest {
         assertNull(userDirectory.lookupUser(UserInfo.Username.valueOf("dummy")));
     }
 
-    @Test
-    public void testLookupByEmailSuccess() {
-        assertNotNull(userDirectory.lookupUserByEmail("admin@example.com"));
-        assertNotNull(userDirectory.lookupUserByEmail("wasabi_writer@example.com"));
-        assertNotNull(userDirectory.lookupUserByEmail("wasabi_admin@example.com"));
-        assertNotNull(userDirectory.lookupUserByEmail("wasabi_reader@example.com"));
-    }
+//    @Test
+//    public void testLookupByEmailSuccess() {
+//        assertNotNull(userDirectory.lookupUserByEmail("admin@example.com"));
+//        assertNotNull(userDirectory.lookupUserByEmail("wasabi_writer@example.com"));
+//        assertNotNull(userDirectory.lookupUserByEmail("wasabi_admin@example.com"));
+//        assertNotNull(userDirectory.lookupUserByEmail("wasabi_reader@example.com"));
+//    }
 
-    @Test
-    public void testExistingUser() {
-        UserInfo user = userDirectory.lookupUserByEmail("admin@example.com");
-        assertNotNull(user);
-        assertThat(user.getEmail(), is("admin@example.com"));
-        assertThat(user.getUsername().getUsername(), is("admin"));
-        assertThat(user.getFirstName(), is("Wasabi"));
-        assertThat(user.getLastName(), is("Admin"));
+//    @Test
+//    public void testExistingUser() {
+//        UserInfo user = userDirectory.lookupUserByEmail("admin@example.com");
+//        assertNotNull(user);
+//        assertThat(user.getEmail(), is("admin@example.com"));
+//        assertThat(user.getUsername().getUsername(), is("admin"));
+//        assertThat(user.getFirstName(), is("Wasabi"));
+//        assertThat(user.getLastName(), is("Admin"));
+//
+//        user = userDirectory.lookupUserByEmail("wasabi_admin@example.com");
+//        assertThat(user.getEmail(), is("wasabi_admin@example.com"));
+//        assertThat(user.getUsername().getUsername(), is("wasabi_admin"));
+//        assertThat(user.getFirstName(), is("Wasabi"));
+//        assertThat(user.getLastName(), is("Admin"));
+//
+//        user = userDirectory.lookupUserByEmail("wasabi_reader@example.com");
+//        assertThat(user.getEmail(), is("wasabi_reader@example.com"));
+//        assertThat(user.getUsername().getUsername(), is("wasabi_reader"));
+//        assertThat(user.getFirstName(), is("Wasabi"));
+//        assertThat(user.getLastName(), is("Reader"));
+//
+//        user = userDirectory.lookupUserByEmail("wasabi_writer@example.com");
+//        assertThat(user.getEmail(), is("wasabi_writer@example.com"));
+//        assertThat(user.getUsername().getUsername(), is("wasabi_writer"));
+//        assertThat(user.getFirstName(), is("Wasabi"));
+//        assertThat(user.getLastName(), is("Writer"));
+//    }
 
-        user = userDirectory.lookupUserByEmail("wasabi_admin@example.com");
-        assertThat(user.getEmail(), is("wasabi_admin@example.com"));
-        assertThat(user.getUsername().getUsername(), is("wasabi_admin"));
-        assertThat(user.getFirstName(), is("Wasabi"));
-        assertThat(user.getLastName(), is("Admin"));
-
-        user = userDirectory.lookupUserByEmail("wasabi_reader@example.com");
-        assertThat(user.getEmail(), is("wasabi_reader@example.com"));
-        assertThat(user.getUsername().getUsername(), is("wasabi_reader"));
-        assertThat(user.getFirstName(), is("Wasabi"));
-        assertThat(user.getLastName(), is("Reader"));
-
-        user = userDirectory.lookupUserByEmail("wasabi_writer@example.com");
-        assertThat(user.getEmail(), is("wasabi_writer@example.com"));
-        assertThat(user.getUsername().getUsername(), is("wasabi_writer"));
-        assertThat(user.getFirstName(), is("Wasabi"));
-        assertThat(user.getLastName(), is("Writer"));
-    }
-
-    @Test
-    public void testLookupUserSuccess() {
-        UserInfo user = userDirectory.lookupUser(UserInfo.Username.valueOf("admin"));
-        assertNotNull(user);
-        assertThat(user.getEmail(), is("admin@example.com"));
-        assertThat(user.getUsername().getUsername(), is("admin"));
-        assertThat(user.getFirstName(), is("Wasabi"));
-        assertThat(user.getLastName(), is("Admin"));
-
-        user = userDirectory.lookupUser(UserInfo.Username.valueOf("wasabi_admin"));
-        assertThat(user.getEmail(), is("wasabi_admin@example.com"));
-        assertThat(user.getUsername().getUsername(), is("wasabi_admin"));
-        assertThat(user.getFirstName(), is("Wasabi"));
-        assertThat(user.getLastName(), is("Admin"));
-
-        user = userDirectory.lookupUser(UserInfo.Username.valueOf("wasabi_reader"));
-        assertThat(user.getEmail(), is("wasabi_reader@example.com"));
-        assertThat(user.getUsername().getUsername(), is("wasabi_reader"));
-        assertThat(user.getFirstName(), is("Wasabi"));
-        assertThat(user.getLastName(), is("Reader"));
-
-        user = userDirectory.lookupUser(UserInfo.Username.valueOf("wasabi_writer"));
-        assertThat(user.getEmail(), is("wasabi_writer@example.com"));
-        assertThat(user.getUsername().getUsername(), is("wasabi_writer"));
-        assertThat(user.getFirstName(), is("Wasabi"));
-        assertThat(user.getLastName(), is("Writer"));
-    }
+//    @Test
+//    public void testLookupUserSuccess() {
+//        UserInfo user = userDirectory.lookupUser(UserInfo.Username.valueOf("admin"));
+//        assertNotNull(user);
+//        assertThat(user.getEmail(), is("admin@example.com"));
+//        assertThat(user.getUsername().getUsername(), is("admin"));
+//        assertThat(user.getFirstName(), is("Wasabi"));
+//        assertThat(user.getLastName(), is("Admin"));
+//
+//        user = userDirectory.lookupUser(UserInfo.Username.valueOf("wasabi_admin"));
+//        assertThat(user.getEmail(), is("wasabi_admin@example.com"));
+//        assertThat(user.getUsername().getUsername(), is("wasabi_admin"));
+//        assertThat(user.getFirstName(), is("Wasabi"));
+//        assertThat(user.getLastName(), is("Admin"));
+//
+//        user = userDirectory.lookupUser(UserInfo.Username.valueOf("wasabi_reader"));
+//        assertThat(user.getEmail(), is("wasabi_reader@example.com"));
+//        assertThat(user.getUsername().getUsername(), is("wasabi_reader"));
+//        assertThat(user.getFirstName(), is("Wasabi"));
+//        assertThat(user.getLastName(), is("Reader"));
+//
+//        user = userDirectory.lookupUser(UserInfo.Username.valueOf("wasabi_writer"));
+//        assertThat(user.getEmail(), is("wasabi_writer@example.com"));
+//        assertThat(user.getUsername().getUsername(), is("wasabi_writer"));
+//        assertThat(user.getFirstName(), is("Wasabi"));
+//        assertThat(user.getLastName(), is("Writer"));
+//    }
 }
