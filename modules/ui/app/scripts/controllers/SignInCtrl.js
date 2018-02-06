@@ -64,6 +64,7 @@ angular.module('wasabi.controllers')
                 $scope.signIn = function (credentials) {
                     $scope.loginFailed = false;
                     $scope.serverDown = false;
+                    $scope.domainFailed = false;
 
                     var creds = JSON.stringify({
                             username: '',
