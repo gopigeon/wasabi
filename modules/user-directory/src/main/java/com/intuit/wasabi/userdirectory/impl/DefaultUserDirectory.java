@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.LineNumberReader;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static java.text.MessageFormat.format;
@@ -80,7 +82,7 @@ public class DefaultUserDirectory implements UserDirectory {
     }
 
     @Override
-    public UserInfo addUser(String username, String password, String firstName, String lastName){
+    public UserInfo addUser(String username, String password, String firstName, String lastName, Boolean writeToFile){
         UserInfo userInfo = new UserInfo.Builder(UserInfo.Username.valueOf(username))
                 .withUserId(username)
                 .withPassword(password)
@@ -89,7 +91,9 @@ public class DefaultUserDirectory implements UserDirectory {
                 .withLastName(lastName)
                 .build();
         users.add(userInfo);
-        writeToFile(username, firstName, lastName);
+        if (writeToFile) {
+            writeToFile(username, firstName, lastName);
+        }
         return userInfo;
     }
 
@@ -106,15 +110,24 @@ public class DefaultUserDirectory implements UserDirectory {
 
     private void writeToFile(String username, String firstName, String lastName) {
         File file = null;
-        FileReader fr = null;
-        LineNumberReader lnr = null;
         String line = "";
         String newLine = "";
         FileWriter writer;
+        String path = "";
+
         try {
-            file = new File("modules/user-directory/src/main/resources/userDirectory.properties");
-            fr = new FileReader(file);
-            lnr = new LineNumberReader(fr);
+            path = Paths.get(getClass().getClassLoader()
+                   .getResource("userDirectory.properties").toURI()).toString();
+            path = path.split("/target")[0];
+            path = path + "/src/main/resources/userDirectory.properties";
+            file = new File(path);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            throw new AuthenticationException("Could not find properties file");
+
+        }
+
+        try(FileReader fr = new FileReader(file); LineNumberReader lnr = new LineNumberReader(fr) ) {
 
             while ((line = lnr.readLine()) != null) {
                 if(line.startsWith("user.ids")){
@@ -125,11 +138,13 @@ public class DefaultUserDirectory implements UserDirectory {
                 }
             }
             newLine = newLine+"user."+username+":"+username+"::"+username+":"+firstName+":"+lastName + "\r\n";
-            writer = new FileWriter("modules/user-directory/src/main/resources/userDirectory.properties");
+            writer = new FileWriter(path);
             writer.write(newLine);
             writer.close();
         } catch (Exception e){
             e.printStackTrace();
+            throw new AuthenticationException("Could not update properties file");
+
         }
     }
 }

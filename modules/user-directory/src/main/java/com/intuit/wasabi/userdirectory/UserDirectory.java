@@ -25,5 +25,5 @@ public interface UserDirectory {
 
     UserInfo getUserByEmail(String userEmail);
 
-    UserInfo addUser(String username, String password, String firstName, String lastName);
+    UserInfo addUser(String username, String password, String firstName, String lastName, Boolean writeToFile);
 }

@@ -23,12 +23,11 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Value;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.authentication.Authentication;
-import com.intuit.wasabi.authentication.util.RandomStringGenerator;
+import com.intuit.wasabi.authentication.util.SecureRandomStringGenerator;
 import com.intuit.wasabi.authenticationobjects.LoginToken;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.exceptions.AuthenticationException;
@@ -38,7 +37,6 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,8 +62,11 @@ public class DefaultAuthentication implements Authentication {
     //Required for google login
     private static final JacksonFactory jacksonFactory = new JacksonFactory();
     private static final HttpTransport transport = new NetHttpTransport();
-    private Pattern EMAIL_ADDRESS_REGEX;
-    private GoogleIdTokenVerifier verifier;
+    private static Pattern EMAIL_ADDRESS_REGEX;
+    private static GoogleIdTokenVerifier verifier;
+
+    private String domain;
+
 
     /**
      * @param userDirectory an instance of userDirectory that help us to lookup the user's info
@@ -73,12 +74,11 @@ public class DefaultAuthentication implements Authentication {
     @Inject
     public DefaultAuthentication(final UserDirectory userDirectory, @Named("google.client.id") String client_id, @Named("domain") String domain) {
         this.userDirectory = userDirectory;
+        this.domain = domain;
         if (client_id != null && client_id.length() > 0){
             verifier = new GoogleIdTokenVerifier.Builder(transport, jacksonFactory)
                     .setAudience(Arrays.asList(client_id)).build();
             EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+]+@"+domain+"$", Pattern.CASE_INSENSITIVE);
-
-
         }
 
     }
@@ -140,13 +140,13 @@ public class DefaultAuthentication implements Authentication {
     /**
      * Attempts to return the LoginToken of the user after verifying the google access token belongs to narvar.
      *
-     * @param token
+     * @param access_token
      * @return a login token for this user (always)
      */
     @Override
-    public LoginToken googleLogIn(final String token) {
-        LOGGER.debug("Authentication header received as: {}", token);
-        UserCredential credential = verifyTokenAndAddUser(token);
+    public LoginToken googleLogIn(String access_token) {
+        LOGGER.debug("Authentication header received as: {}", access_token);
+        UserCredential credential = verifyTokenAndAddUser(access_token);
         if (isBasicAuthenicationValid(credential)) {
             return withAccessToken(credential.toBase64Encode()).withTokenType(BASIC).build();
         } else {
@@ -157,18 +157,19 @@ public class DefaultAuthentication implements Authentication {
     /**
      * Verifies the google token is properly signed or corrupted
      *
-     * @param token
+     * @param access_token
      * @return Credential for the user on successful verification
      * @throws AuthenticationException if not successful
      */
-    private UserCredential verifyTokenAndAddUser(String token) {
+    private UserCredential verifyTokenAndAddUser(String access_token) {
         GoogleIdToken idToken = null;
         try {
-            idToken = verifier.verify(token);
-        } catch (GeneralSecurityException e) {
+            idToken = verifier.verify(access_token);
+//        } catch (GeneralSecurityException e) {
+//            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            throw new AuthenticationException("Authentication login failed. Invalid Token");
         }
         if (idToken != null) {
             GoogleIdToken.Payload payload = idToken.getPayload();
@@ -180,16 +181,16 @@ public class DefaultAuthentication implements Authentication {
             if (u == null){
                 Matcher m = EMAIL_ADDRESS_REGEX.matcher(email);
                 if(m.find()){
-                    String password = RandomStringGenerator.getSaltString();
+                    String password = SecureRandomStringGenerator.getSaltString();
 //                    String encryptPassword = CryptWithMD5.cryptWithMD5(password);
-                    userDirectory.addUser(email, password, givenName, familyName);
+                    userDirectory.addUser(email, password, givenName, familyName, true);
                     UserCredential credential = new UserCredential(email, password);
                     return credential;
                 } else {
-                    throw new AuthenticationException("Authentication login failed. Only Narvar email Allowed");
+                    throw new AuthenticationException("Authentication login failed. Only "+ domain +" email allowed");
                 }
             } else {
-                String password = RandomStringGenerator.getSaltString();
+                String password = SecureRandomStringGenerator.getSaltString();
 //                String encryptPassword = CryptWithMD5.cryptWithMD5(password);
                 u.setPassword(password);
                 UserCredential credential = new UserCredential(email, password);
@@ -268,5 +269,13 @@ public class DefaultAuthentication implements Authentication {
         }
 
         return new UserCredential(fields[0], fields[1]);
+    }
+
+    public GoogleIdTokenVerifier getVerifier() {
+        return verifier;
+    }
+
+    public static Pattern getEmailAddressRegex() {
+        return EMAIL_ADDRESS_REGEX;
     }
 }

@@ -117,4 +117,12 @@ public class DefaultUserDirectoryTest {
 //        assertThat(user.getFirstName(), is("Wasabi"));
 //        assertThat(user.getLastName(), is("Writer"));
 //    }
+
+
+    @Test
+    public void testInsertUser() {
+        assertNotNull(userDirectory.addUser("test","asdfg","firstname","lastname", false));
+        assertNull(userDirectory.getUserByEmail("test1"));
+        assertNotNull(userDirectory.getUserByEmail("test"));
+    }
 }

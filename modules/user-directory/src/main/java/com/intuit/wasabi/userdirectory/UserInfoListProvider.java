@@ -24,24 +24,26 @@ public class UserInfoListProvider implements Provider<List<UserInfo>> {
     public UserInfoListProvider(@Named(USER_DIRECTORY_PATH) String userDirectoryPath) {
         Properties properties = create(userDirectoryPath, UserDirectoryModule.class);
         String userIds = getProperty("user.ids", properties);
-        for (String userId : userIds.split(":")) {
-            userId = trimToNull(userId);
-            // format userId:username:password:email:firstname:lastname
-            if (userId != null) {
-                String userCredentials = getProperty("user." + userId, properties);
+        if(userIds != null) {
+            for (String userId : userIds.split(":")) {
+                userId = trimToNull(userId);
+                // format userId:username:password:email:firstname:lastname
+                if (userId != null) {
+                    String userCredentials = getProperty("user." + userId, properties);
 
-                userCredentials = trimToNull(userCredentials);
+                    userCredentials = trimToNull(userCredentials);
 
-                if (userCredentials != null) {
-                    final String[] userCredential = userCredentials.split(":", -1);
+                    if (userCredentials != null) {
+                        final String[] userCredential = userCredentials.split(":", -1);
 
-                    users.add(new UserInfo.Builder(UserInfo.Username.valueOf(userCredential[0]))
-                            .withUserId(userId)
-                            .withPassword(userCredential[1])
-                            .withEmail(userCredential[2])
-                            .withFirstName(userCredential[3])
-                            .withLastName(userCredential[4])
-                            .build());
+                        users.add(new UserInfo.Builder(UserInfo.Username.valueOf(userCredential[0]))
+                                .withUserId(userId)
+                                .withPassword(userCredential[1])
+                                .withEmail(userCredential[2])
+                                .withFirstName(userCredential[3])
+                                .withLastName(userCredential[4])
+                                .build());
+                    }
                 }
             }
         }
