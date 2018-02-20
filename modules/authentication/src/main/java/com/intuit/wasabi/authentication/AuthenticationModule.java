@@ -57,6 +57,8 @@ public class AuthenticationModule extends AbstractModule {
                 .toInstance(getProperty("google.client.id", properties));
         bind(String.class).annotatedWith(named("domain"))
                 .toInstance(getProperty("domain", properties));
+        bind(String.class).annotatedWith(named("auth_group"))
+                .toInstance(getProperty("auth_group", properties));
         bind(Integer.class).annotatedWith(named("authentication.http.proxy.port"))
                 .toInstance(Integer.parseInt(getProperty("http.proxy.port", properties, "80")));
 

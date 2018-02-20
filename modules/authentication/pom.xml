@@ -67,5 +67,12 @@
             <artifactId>google-api-client</artifactId>
             <version>1.23.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-admin-directory -->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-admin-directory</artifactId>
+            <version>directory_v1-rev91-1.23.0</version>
+        </dependency>
+
     </dependencies>
 </project>

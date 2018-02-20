@@ -27,21 +27,19 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.authentication.Authentication;
+import com.intuit.wasabi.authentication.util.GoogleDirectory;
 import com.intuit.wasabi.authentication.util.SecureRandomStringGenerator;
 import com.intuit.wasabi.authenticationobjects.LoginToken;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.userdirectory.UserDirectory;
 import org.slf4j.Logger;
-
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Optional.fromNullable;
-import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static com.intuit.wasabi.authenticationobjects.LoginToken.withAccessToken;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -66,15 +64,17 @@ public class DefaultAuthentication implements Authentication {
     private static GoogleIdTokenVerifier verifier;
 
     private String domain;
+    private String auth_group;
 
 
     /**
      * @param userDirectory an instance of userDirectory that help us to lookup the user's info
      */
     @Inject
-    public DefaultAuthentication(final UserDirectory userDirectory, @Named("google.client.id") String client_id, @Named("domain") String domain) {
+    public DefaultAuthentication(final UserDirectory userDirectory, @Named("google.client.id") String client_id, @Named("domain") String domain, @Named("auth_group") String auth_group) {
         this.userDirectory = userDirectory;
         this.domain = domain;
+        this.auth_group = auth_group;
         if (client_id != null && client_id.length() > 0){
             verifier = new GoogleIdTokenVerifier.Builder(transport, jacksonFactory)
                     .setAudience(Arrays.asList(client_id)).build();
@@ -92,9 +92,7 @@ public class DefaultAuthentication implements Authentication {
     @Override
     public LoginToken logIn(final String authHeader) {
         LOGGER.debug("Authentication header received as: {}", authHeader);
-
         UserCredential credential = parseUsernamePassword(fromNullable(authHeader));
-
         if (isBasicAuthenicationValid(credential)) {
             return withAccessToken(credential.toBase64Encode()).withTokenType(BASIC).build();
         } else {
@@ -127,7 +125,6 @@ public class DefaultAuthentication implements Authentication {
     @Override
     public LoginToken verifyToken(final String tokenHeader) {
         LOGGER.debug("Authentication token received as: {}", tokenHeader);
-
         UserCredential credential = parseUsernamePassword(fromNullable(tokenHeader));
 
         if (isBasicAuthenicationValid(credential)) {
@@ -180,7 +177,7 @@ public class DefaultAuthentication implements Authentication {
             UserInfo u = userDirectory.getUserByEmail(email);
             if (u == null){
                 Matcher m = EMAIL_ADDRESS_REGEX.matcher(email);
-                if(m.find()){
+                if(m.find() && checkUserBelongToGroup(auth_group, email)){
                     String password = SecureRandomStringGenerator.getSaltString();
 //                    String encryptPassword = CryptWithMD5.cryptWithMD5(password);
                     userDirectory.addUser(email, password, givenName, familyName, true);
@@ -278,4 +275,41 @@ public class DefaultAuthentication implements Authentication {
     public static Pattern getEmailAddressRegex() {
         return EMAIL_ADDRESS_REGEX;
     }
+
+//    /**
+//     * Build and returns a Directory service object authorized with the service accounts
+//     * that act on behalf of the given user.
+//     *
+//     * @param userEmail The email of the user. Needs permissions to access the Admin APIs.
+//     * @return Directory service object that is ready to make requests.
+//     */
+//    public static Directory getDirectoryService(String userEmail) throws GeneralSecurityException,
+//            IOException, URISyntaxException {
+//        HttpTransport httpTransport = new NetHttpTransport();
+//        JacksonFactory jsonFactory = new JacksonFactory();
+//        Directory service = null;
+//        GoogleCredential credential = new GoogleCredential.Builder()
+//                .setTransport(httpTransport)
+//                .setJsonFactory(jsonFactory)
+//                .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
+//                .setServiceAccountScopes(Arrays.asList(DirectoryScopes.ADMIN_DIRECTORY_GROUP_MEMBER, DirectoryScopes.ADMIN_DIRECTORY_GROUP, DirectoryScopes.ADMIN_DIRECTORY_USER))
+//                .setServiceAccountUser(userEmail)
+//                .setServiceAccountPrivateKeyFromP12File(
+//                        new java.io.File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
+//                .build();
+//            service = new Directory.Builder(httpTransport, jsonFactory, null)
+//                    .setHttpRequestInitializer(credential).build();
+//        return service;
+//    }
+
+//
+    public boolean checkUserBelongToGroup(String group, String email) {
+        try {
+            return GoogleDirectory.getInstance().service.members().hasMember(group, email).execute().getIsMember();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
