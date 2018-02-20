@@ -177,7 +177,7 @@ angular.module('wasabi', [
     })
 
     .constant('GOOGLE_LOGIN', {
-        domain : "narvar.com"
+        domain : "gopigeon.in"
     })
 
     /*
