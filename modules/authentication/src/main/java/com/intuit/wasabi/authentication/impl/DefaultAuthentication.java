@@ -305,7 +305,8 @@ public class DefaultAuthentication implements Authentication {
 //
     public boolean checkUserBelongToGroup(String group, String email) {
         try {
-            return GoogleDirectory.getInstance().service.members().hasMember(group, email).execute().getIsMember();
+            Boolean b = GoogleDirectory.getInstance().service.members().hasMember(group, email).execute().getIsMember();
+            return b;
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -29,8 +29,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.LineNumberReader;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.List;
 
 import static java.text.MessageFormat.format;
@@ -90,10 +88,10 @@ public class DefaultUserDirectory implements UserDirectory {
                 .withFirstName(firstName)
                 .withLastName(lastName)
                 .build();
-        users.add(userInfo);
         if (writeToFile) {
             writeToFile(username, firstName, lastName);
         }
+        users.add(userInfo);
         return userInfo;
     }
 

@@ -15,9 +15,9 @@ public class GoogleDirectory {
     private static GoogleDirectory single_instance = null;
     private static final String userEmail = "shivam@gopigeon.in";
     private static final String SERVICE_ACCOUNT_EMAIL = "wasabi-gsuite@wasabi-195410.iam.gserviceaccount.com";
-    private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "modules/authentication/src/main/resources/wasabi-service-account-private-key.p12";
-
+    private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "./wasabi.p12";
     public Directory service = null;
+    public String error = null;
 
     private GoogleDirectory()
     {
@@ -31,7 +31,7 @@ public class GoogleDirectory {
                     .setServiceAccountScopes(Arrays.asList(DirectoryScopes.ADMIN_DIRECTORY_GROUP_MEMBER, DirectoryScopes.ADMIN_DIRECTORY_GROUP, DirectoryScopes.ADMIN_DIRECTORY_USER))
                     .setServiceAccountUser(userEmail)
                     .setServiceAccountPrivateKeyFromP12File(
-                            new java.io.File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
+                            new File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
                     .build();
             service = new Directory.Builder(httpTransport, jsonFactory, null)
                     .setHttpRequestInitializer(credential).build();
