@@ -114,18 +114,8 @@ public class DefaultUserDirectory implements UserDirectory {
         String newLine = "";
         FileWriter writer;
         String path = "";
-
-        try {
-            path = Paths.get(getClass().getClassLoader()
-                   .getResource("userDirectory.properties").toURI()).toString();
-            path = path.split("/target")[0];
-            path = path + "/src/main/resources/userDirectory.properties";
-            file = new File(path);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            throw new AuthenticationException("Could not find properties file");
-
-        }
+        path = "./../user-directory/src/main/resources/userDirectory.properties";
+        file = new File(path);
 
         try(FileReader fr = new FileReader(file); LineNumberReader lnr = new LineNumberReader(fr) ) {
 
