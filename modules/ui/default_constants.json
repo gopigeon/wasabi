@@ -4,6 +4,6 @@
     "noAuthRedirect": "",
     "ssoLogoutRedirect": "",
     "apiAuthInfo": "",
-    "apiHostBaseUrlValue":"http://wasabi.gopigeon.biz/api/v1",
-    "downloadBaseUrlValue": "http://wasabi.gopigeon.biz/api/v1"
+    "apiHostBaseUrlValue":"DEFAULT",
+    "downloadBaseUrlValue": "DEFAULT"
 }

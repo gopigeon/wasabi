@@ -8,6 +8,7 @@ import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class GoogleDirectory {
@@ -15,7 +16,9 @@ public class GoogleDirectory {
     private static GoogleDirectory single_instance = null;
     private static final String userEmail = "shivam@gopigeon.in";
     private static final String SERVICE_ACCOUNT_EMAIL = "wasabi-gsuite@wasabi-195410.iam.gserviceaccount.com";
-    private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "./wasabi.p12";
+    private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "./../wasabi.p12";
+//private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "modules/authentication/wasabi.p12";
+
     public Directory service = null;
     public String error = null;
 
@@ -37,6 +40,7 @@ public class GoogleDirectory {
                     .setHttpRequestInitializer(credential).build();
         } catch (Exception e){
             e.printStackTrace();
+            error = e.toString();
         }
     }
 
