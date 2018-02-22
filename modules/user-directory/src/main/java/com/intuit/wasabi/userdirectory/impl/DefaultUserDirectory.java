@@ -112,7 +112,7 @@ public class DefaultUserDirectory implements UserDirectory {
         String newLine = "";
         FileWriter writer;
         String path = "";
-        path = "./../user-directory/src/main/resources/userDirectory.properties";
+        path = "./../../user-directory/src/main/resources/userDirectory.properties";
         file = new File(path);
 
         try(FileReader fr = new FileReader(file); LineNumberReader lnr = new LineNumberReader(fr) ) {
