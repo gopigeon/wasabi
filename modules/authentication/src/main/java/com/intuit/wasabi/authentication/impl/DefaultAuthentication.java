@@ -35,6 +35,7 @@ import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.userdirectory.UserDirectory;
 import org.slf4j.Logger;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -164,8 +165,9 @@ public class DefaultAuthentication implements Authentication {
         GoogleIdToken idToken = null;
         try {
             idToken = verifier.verify(access_token);
-//        } catch (GeneralSecurityException e) {
-//            e.printStackTrace();
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+            throw new AuthenticationException("Authentication login failed. Security Exception");
         } catch (Exception e) {
             e.printStackTrace();
             throw new AuthenticationException("Authentication login failed. Invalid Token");
@@ -176,28 +178,22 @@ public class DefaultAuthentication implements Authentication {
             String familyName = (String) payload.get("family_name");
             String givenName = (String) payload.get("given_name");
 
-            UserInfo u = userDirectory.getUserByEmail(email);
-            if (u == null){
-                Matcher m = EMAIL_ADDRESS_REGEX.matcher(email);
-                if(m.find()){
-                    if(checkUserBelongToGroup(authGroup, email)) {
-                        String password = SecureRandomStringGenerator.getSaltString();
-//                      String encryptPassword = CryptWithMD5.cryptWithMD5(password);
+            Matcher m = EMAIL_ADDRESS_REGEX.matcher(email);
+            if(m.find()){
+                if(checkUserBelongToGroup(authGroup, email)) {
+                    String password = SecureRandomStringGenerator.getSaltString();
+//                    String encryptPassword = CryptWithMD5.cryptWithMD5(password);
+                    UserInfo u = userDirectory.getUserByEmail(email);
+                    if (u == null) {
                         userDirectory.addUser(email, password, givenName, familyName, true);
-                        UserCredential credential = new UserCredential(email, password);
-                        return credential;
-                    } else {
-                        throw new AuthenticationException("Authentication login failed. Only user belonging to "+ authGroup +" group allowed");
                     }
+                    UserCredential credential = new UserCredential(email, password);
+                    return credential;
                 } else {
-                    throw new AuthenticationException("Authentication login failed. Only "+ domain +" email allowed");
+                    throw new AuthenticationException("Authentication login failed. Only user belonging to "+ authGroup +" group allowed");
                 }
             } else {
-                String password = SecureRandomStringGenerator.getSaltString();
-//                String encryptPassword = CryptWithMD5.cryptWithMD5(password);
-                u.setPassword(password);
-                UserCredential credential = new UserCredential(email, password);
-                return credential;
+                throw new AuthenticationException("Authentication login failed. Only "+ domain +" email allowed");
             }
         } else {
             System.out.println("Invalid ID token.");
@@ -282,33 +278,6 @@ public class DefaultAuthentication implements Authentication {
         return EMAIL_ADDRESS_REGEX;
     }
 
-//    /**
-//     * Build and returns a Directory service object authorized with the service accounts
-//     * that act on behalf of the given user.
-//     *
-//     * @param userEmail The email of the user. Needs permissions to access the Admin APIs.
-//     * @return Directory service object that is ready to make requests.
-//     */
-//    public static Directory getDirectoryService(String userEmail) throws GeneralSecurityException,
-//            IOException, URISyntaxException {
-//        HttpTransport httpTransport = new NetHttpTransport();
-//        JacksonFactory jsonFactory = new JacksonFactory();
-//        Directory service = null;
-//        GoogleCredential credential = new GoogleCredential.Builder()
-//                .setTransport(httpTransport)
-//                .setJsonFactory(jsonFactory)
-//                .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
-//                .setServiceAccountScopes(Arrays.asList(DirectoryScopes.ADMIN_DIRECTORY_GROUP_MEMBER, DirectoryScopes.ADMIN_DIRECTORY_GROUP, DirectoryScopes.ADMIN_DIRECTORY_USER))
-//                .setServiceAccountUser(userEmail)
-//                .setServiceAccountPrivateKeyFromP12File(
-//                        new java.io.File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
-//                .build();
-//            service = new Directory.Builder(httpTransport, jsonFactory, null)
-//                    .setHttpRequestInitializer(credential).build();
-//        return service;
-//    }
-
-//
     public boolean checkUserBelongToGroup(String group, String email) {
         try {
             Boolean b = googleDirectory.service.members().hasMember(group, email).execute().getIsMember();
