@@ -6,6 +6,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,16 +15,14 @@ import java.util.Arrays;
 
 public class GoogleDirectory {
 
-    private static GoogleDirectory single_instance = null;
-    private static final String userEmail = "shivam@gopigeon.in";
-    private static final String SERVICE_ACCOUNT_EMAIL = "wasabi-gsuite@wasabi-195410.iam.gserviceaccount.com";
+//    private String user_email;
+//    private static final String SERVICE_ACCOUNT_EMAIL = "wasabi-gsuite@wasabi-195410.iam.gserviceaccount.com";
     private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "./../wasabi.p12";
-//private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "modules/authentication/wasabi.p12";
-
     public Directory service = null;
     public String error = null;
 
-    private GoogleDirectory()
+    @Inject
+    public GoogleDirectory(@Named("user_email") String user_email, @Named("service_account_email") String service_account_email)
     {
         try {
             HttpTransport httpTransport = new NetHttpTransport();
@@ -30,9 +30,9 @@ public class GoogleDirectory {
             GoogleCredential credential = new GoogleCredential.Builder()
                     .setTransport(httpTransport)
                     .setJsonFactory(jsonFactory)
-                    .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
+                    .setServiceAccountId(service_account_email)
                     .setServiceAccountScopes(Arrays.asList(DirectoryScopes.ADMIN_DIRECTORY_GROUP_MEMBER, DirectoryScopes.ADMIN_DIRECTORY_GROUP, DirectoryScopes.ADMIN_DIRECTORY_USER))
-                    .setServiceAccountUser(userEmail)
+                    .setServiceAccountUser(user_email)
                     .setServiceAccountPrivateKeyFromP12File(
                             new File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
                     .build();
@@ -44,11 +44,5 @@ public class GoogleDirectory {
         }
     }
 
-    public static GoogleDirectory getInstance()
-    {
-        if (single_instance == null)
-            single_instance = new GoogleDirectory();
 
-        return single_instance;
-    }
 }

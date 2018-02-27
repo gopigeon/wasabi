@@ -17,6 +17,7 @@ package com.intuit.wasabi.authentication;
 
 import com.google.inject.AbstractModule;
 import com.intuit.wasabi.authentication.impl.NoOpAuthenticateByHttpRequestImpl;
+import com.intuit.wasabi.authentication.util.GoogleDirectory;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import org.slf4j.Logger;
 
@@ -59,6 +60,10 @@ public class AuthenticationModule extends AbstractModule {
                 .toInstance(getProperty("domain", properties));
         bind(String.class).annotatedWith(named("auth_group"))
                 .toInstance(getProperty("auth_group", properties));
+        bind(String.class).annotatedWith(named("user_email"))
+                .toInstance(getProperty("user_email", properties));
+        bind(String.class).annotatedWith(named("service_account_email"))
+                .toInstance(getProperty("service_account_email", properties));
         bind(Integer.class).annotatedWith(named("authentication.http.proxy.port"))
                 .toInstance(Integer.parseInt(getProperty("http.proxy.port", properties, "80")));
 
@@ -70,6 +75,7 @@ public class AuthenticationModule extends AbstractModule {
 
             bind(Authentication.class).to(authImplClass).in(SINGLETON);
             bind(AuthenticateByHttpRequest.class).to(NoOpAuthenticateByHttpRequestImpl.class).asEagerSingleton();
+            bind(GoogleDirectory.class).in(SINGLETON);
         } catch (ClassNotFoundException e) {
             LOGGER.error("unable to find class: {}", authenticationClassName, e);
             throw new AuthenticationException("unable to find class: " + authenticationClassName, e);

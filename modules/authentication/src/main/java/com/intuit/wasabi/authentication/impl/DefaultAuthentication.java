@@ -55,7 +55,6 @@ public class DefaultAuthentication implements Authentication {
     public static final String BASIC = "Basic";
     public static final String EMPTY = "";
     private static final Logger LOGGER = getLogger(DefaultAuthentication.class);
-    private UserDirectory userDirectory;
 
     //Required for google login
     private static final JacksonFactory jacksonFactory = new JacksonFactory();
@@ -63,21 +62,24 @@ public class DefaultAuthentication implements Authentication {
     private static Pattern EMAIL_ADDRESS_REGEX;
     private static GoogleIdTokenVerifier verifier;
 
+    private UserDirectory userDirectory;
     private String domain;
-    private String auth_group;
+    private String authGroup;
+    private GoogleDirectory googleDirectory;
 
 
     /**
      * @param userDirectory an instance of userDirectory that help us to lookup the user's info
      */
     @Inject
-    public DefaultAuthentication(final UserDirectory userDirectory, @Named("google.client.id") String client_id, @Named("domain") String domain, @Named("auth_group") String auth_group) {
+    public DefaultAuthentication(final UserDirectory userDirectory, @Named("google.client.id") String clientId, @Named("domain") String domain, @Named("auth_group") String authGroup, GoogleDirectory googleDirectory) {
         this.userDirectory = userDirectory;
         this.domain = domain;
-        this.auth_group = auth_group;
-        if (client_id != null && client_id.length() > 0){
+        this.authGroup = authGroup;
+        this.googleDirectory = googleDirectory;
+        if (clientId != null && clientId.length() > 0){
             verifier = new GoogleIdTokenVerifier.Builder(transport, jacksonFactory)
-                    .setAudience(Arrays.asList(client_id)).build();
+                    .setAudience(Arrays.asList(clientId)).build();
             EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+]+@"+domain+"$", Pattern.CASE_INSENSITIVE);
         }
 
@@ -177,12 +179,16 @@ public class DefaultAuthentication implements Authentication {
             UserInfo u = userDirectory.getUserByEmail(email);
             if (u == null){
                 Matcher m = EMAIL_ADDRESS_REGEX.matcher(email);
-                if(m.find() && checkUserBelongToGroup(auth_group, email)){
-                    String password = SecureRandomStringGenerator.getSaltString();
-//                    String encryptPassword = CryptWithMD5.cryptWithMD5(password);
-                    userDirectory.addUser(email, password, givenName, familyName, true);
-                    UserCredential credential = new UserCredential(email, password);
-                    return credential;
+                if(m.find()){
+                    if(checkUserBelongToGroup(authGroup, email)) {
+                        String password = SecureRandomStringGenerator.getSaltString();
+//                      String encryptPassword = CryptWithMD5.cryptWithMD5(password);
+                        userDirectory.addUser(email, password, givenName, familyName, true);
+                        UserCredential credential = new UserCredential(email, password);
+                        return credential;
+                    } else {
+                        throw new AuthenticationException("Authentication login failed. Only user belonging to "+ authGroup +" group allowed");
+                    }
                 } else {
                     throw new AuthenticationException("Authentication login failed. Only "+ domain +" email allowed");
                 }
@@ -305,7 +311,7 @@ public class DefaultAuthentication implements Authentication {
 //
     public boolean checkUserBelongToGroup(String group, String email) {
         try {
-            Boolean b = GoogleDirectory.getInstance().service.members().hasMember(group, email).execute().getIsMember();
+            Boolean b = googleDirectory.service.members().hasMember(group, email).execute().getIsMember();
             return b;
         } catch (IOException e) {
             e.printStackTrace();
