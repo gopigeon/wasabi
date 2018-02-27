@@ -111,7 +111,6 @@ public class DefaultAuthentication implements Authentication {
         // FIXME: this looks convoluted to me
         try {
             UserInfo userInfo = userDirectory.lookupUser(UserInfo.Username.valueOf(credential.username));
-
             return userInfo.getPassword().equals(credential.password);
         } catch (AuthenticationException ae) {
             LOGGER.error("Unable to lookup user", ae);
@@ -185,7 +184,9 @@ public class DefaultAuthentication implements Authentication {
 //                    String encryptPassword = CryptWithMD5.cryptWithMD5(password);
                     UserInfo u = userDirectory.getUserByEmail(email);
                     if (u == null) {
-                        userDirectory.addUser(email, password, givenName, familyName, true);
+                        userDirectory.addUser(email, password, givenName, familyName, false);
+                    } else {
+                        u.setPassword(password);
                     }
                     UserCredential credential = new UserCredential(email, password);
                     return credential;
